@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.24;
 
 import "./IERC721Lazy.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -10,7 +10,7 @@ abstract contract ERC721Lazy is ERC721URIStorage, EIP712, IERC721Lazy {
     mapping(address => uint) public sellerBalances;
 
     bytes32 private constant _VOUNCHER_TYPEHASH =
-        keccak256("NFTVoucher(uint256 tokenId, uint256 minPrice, string uri)");
+        keccak256("NFTVoucher(uint256 tokenId,uint256 minPrice,string uri)");
 
     constructor(string memory name) EIP712(name, "1") {}
 
@@ -24,7 +24,7 @@ abstract contract ERC721Lazy is ERC721URIStorage, EIP712, IERC721Lazy {
         bytes32 r,
         bytes32 s
     ) public payable returns (uint) {
-        require(msg.value >= minPrice);
+        require(msg.value >= minPrice, "Insufficient funds to redeem");
 
         bytes32 structHash = keccak256(
             abi.encode(
@@ -50,15 +50,15 @@ abstract contract ERC721Lazy is ERC721URIStorage, EIP712, IERC721Lazy {
         return tokenId;
     }
 
-     function withdraw() public {
+    function withdraw() public {
         address receiver = msg.sender;
 
         uint amount = availableToWithdraw(receiver);
         require(amount > 0);
 
         sellerBalances[receiver] = 0;
-        
-        (bool ok,) = receiver.call{value: amount}("");
+
+        (bool ok, ) = receiver.call{value: amount}("");
 
         require(ok);
     }
@@ -67,7 +67,7 @@ abstract contract ERC721Lazy is ERC721URIStorage, EIP712, IERC721Lazy {
         return sellerBalances[receiver];
     }
 
-    function DOMAIN_SEPARATOR() external view returns(bytes32) {
+    function DOMAIN_SEPARATOR() external view returns (bytes32) {
         return _domainSeparatorV4();
     }
 }
