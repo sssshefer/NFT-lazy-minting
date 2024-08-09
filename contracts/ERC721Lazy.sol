@@ -49,4 +49,25 @@ abstract contract ERC721Lazy is ERC721URIStorage, EIP712, IERC721Lazy {
 
         return tokenId;
     }
+
+     function withdraw() public {
+        address receiver = msg.sender;
+
+        uint amount = availableToWithdraw(receiver);
+        require(amount > 0);
+
+        sellerBalances[receiver] = 0;
+        
+        (bool ok,) = receiver.call{value: amount}("");
+
+        require(ok);
+    }
+
+    function availableToWithdraw(address receiver) public view returns (uint) {
+        return sellerBalances[receiver];
+    }
+
+    function DOMAIN_SEPARATOR() external view returns(bytes32) {
+        return _domainSeparatorV4();
+    }
 }
