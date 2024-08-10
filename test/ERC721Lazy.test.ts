@@ -1,5 +1,4 @@
 import { loadFixture, ethers, expect } from "./setup";
-import { AddressLike, BigNumberish, Signer } from "ethers";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { NFTLazyMinting } from "../typechain-types";
 
@@ -58,11 +57,11 @@ async function signLazyMint(
         minPrice,
         uri
     }
-
+    const defaultHardhatChainId = 31337;
     const domain: Domain = {
         name: "ShefNFT",
         version: "1",
-        chainId: 31337,
+        chainId: defaultHardhatChainId,
         verifyingContract: token
     };
 
@@ -206,12 +205,13 @@ describe("NFTLazyMinting", function () {
         const minPrice = 250;
         const uri = "exampleShefNFT4.com";
 
+        const invalidUser = user2;
         const signedMessage = await signLazyMint(
             await shefNFT.getAddress(),
             tokenId,
             minPrice,
             uri,
-            user2
+            invalidUser
         );
 
         await expect(
